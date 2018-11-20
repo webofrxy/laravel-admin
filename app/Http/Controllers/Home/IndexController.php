@@ -309,4 +309,9 @@ class IndexController extends Controller
         }
         return $feed->render('atom');
     }
+    //测试 
+    public function test()
+    {
+        
+    }
 }
