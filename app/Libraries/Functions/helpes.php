@@ -95,3 +95,46 @@ if ( !function_exists('send_email') ) {
         return $data;
     }
 }
+if ( !function_exists('upload') ) {
+	/**
+	 * 上传文件函数
+	 *
+	 * @param $file             表单的name名
+	 * @param string $path 上传的路径
+	 * @param bool $childPath 是否根据日期生成子目录
+	 * @return array            上传的状态
+	 */
+    function upload($file, $path='upload', $childPath = true){
+        //判断请求中是否包含name=file 的上传文件
+        if(!request()->hasFile()){
+            $data = ['message'=>'上传文件为空', 'status_code'=>500];
+            return $data;
+        }
+        $file = request()->file($file);
+        if(!$file->isValid){
+            $data = ['message'=>'文件上传出错', 'status_code'=>500];
+            return $data;
+        }
+        //兼容性的路径处理问题
+        if($childPath == true){
+            $path = './'.trim($path, './').'/'.date('Ymd').'/';
+        }else{
+            $path = './'.trim($path, './').'/';
+        }
+        //如果没有目录则新建目录
+        if(!is_dir($path)){
+            mkdir($path, 0755, true);
+        }
+        //获取上传的文件名
+        $oldName = $file -> getClientOriginalExtension();
+        //上传失败
+		if (!$file->move($path, $newName)) {
+			$data = ['status_code' => 500, 'message' => '保存文件失败'];
+			return $data;
+		}
+		//上传成功
+		$data = ['status_code' => 200, 'message' => '上传成功', 'data' => ['old_name' => $oldName, 'new_name' => $newName, 'path' => trim($path, '.')]];
+		return $data;
+
+    }
+}
